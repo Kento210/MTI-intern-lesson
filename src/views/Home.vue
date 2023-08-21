@@ -9,59 +9,65 @@
 </template>
 
 <script>
-// 必要なものはここでインポートする
-// @は/srcと同じ意味です
-// import something from '@/components/something.vue';
-// import { baseUrl } from '@/assets/config.js';
+  // 必要なものはここでインポートする
+  // @は/srcと同じ意味です
+  // import something from '@/components/something.vue';
+  // import { baseUrl } from '@/assets/config.js';
 
-// const headers = {'Authorization' : 'mtiToken'};
+  // const headers = {'Authorization' : 'mtiToken'};
 
-export default {
-  name: 'Home',
+  export default {
+    name: 'Home',
 
-  components: {
-   // 読み込んだコンポーネント名をここに記述する
-  },
+    components: {
+      // 読み込んだコンポーネント名をここに記述する
+    },
 
-  data() {
-    // Vue.jsで使う変数はここに記述する
-    return {
-      post: {
-        text: null,
-        category: null,
-      },
-      search: {
-        userId: null,
-        category: null,
-        start: null,
-        end: null,
-      },
-      articles: [],
-      iam: null,
-    };
-  },
-  computed: {
-  // 計算した結果を変数として利用したいときはここに記述する
-  },
+    data() {
+      // Vue.jsで使う変数はここに記述する
+      return {
+        post: {
+          text: null,
+          category: null,
+        },
+        search: {
+          userId: null,
+          category: null,
+          start: null,
+          end: null,
+        },
+        articles: [],
+        iam: null,
+      };
+    },
+    computed: {
+      // 計算した結果を変数として利用したいときはここに記述する
+    },
 
-  created: async function() {
-    // Vue.jsの読み込みが完了したときに実行する処理はここに記述する
-    // apiからarticleを取得する
-    
-    // for debug
-    //this.$router.push({ name: 'User' })
-  },
+    created: async function() {
+      // Vue.jsの読み込みが完了したときに実行する処理はここに記述する
+      // apiからarticleを取得する
+      
+      //最初にtokenがあるか確認してなければ自動的にloginに移動する
+      var tokenString = window.localStorage.getItem('token');
+      if (tokenString) {
+        //tokenがある
+      }
+      else {
+        this.$router.push({ name: 'Login' });
+      }
+    },
 
-  methods: {
-    // Vue.jsで使う関数はここで記述する
-    // isMyArticle(id) {}, // 自分の記事かどうかを判定する
-    // async getArticles() {}, // 記事一覧を取得する
-    // async postArticle() {}, // 記事を作成する
-    // async getSearchedArticles() {}, // 記事を検索する
-    // async deleteArticle(article) {}, // 記事を削除する
-    // convertToLocaleString(timestamp) {} // timestampをLocaleDateStringに変換する
+    methods: {
+      // Vue.jsで使う関数はここで記述する
+      // isMyArticle(id) {}, // 自分の記事かどうかを判定する
+      // async getArticles() {}, // 記事一覧を取得する
+      // async postArticle() {}, // 記事を作成する
+      // async getSearchedArticles() {}, // 記事を検索する
+      // async deleteArticle(article) {}, // 記事を削除する
+      // convertToLocaleString(timestamp) {} // timestampをLocaleDateStringに変換する
+    }
   }
-}
 </script>
 
 <style scoped>
