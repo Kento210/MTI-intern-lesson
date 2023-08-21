@@ -1,72 +1,54 @@
 <template>
   <div>
     <div class="ui main container">
-
-      <!-- 発展課題のローディング表示用 -->
-      <div class="ui active inverted page dimmer" v-if="isCallingApi">
-        <div class="ui text loader">Loading</div>
-      </div>
-
+      <!-- 基本的なコンテンツはここに記載する -->
       <div class="ui segment">
-        <!-- 発展課題のエラーメッセージ用-->
-        <p class="ui negative message" v-if="errorMsg">
-          <i class="close icon" @click="clearMsg('error')"></i>
-          <span class="header">エラーが発生しました！</span>
-          {{ errorMsg }}
-        </p>
-
-        <!-- 発展課題の成功メッセージ用-->
-        <p class="ui positive message" v-if="successMsg">
-          <i class="close icon" @click="clearMsg"></i>
-          <span class="header">完了しました！</span>
-          {{ successMsg }}
-        </p>
-
-        <!-- 更新情報入力用フォーム -->
-        <form class="ui large form" @submit.prevent="submit" >
+        
+        <form class="ui large form" @submit.prevent="submit">
           <div class="field">
             <div class="ui left icon input">
               <i class="user icon"></i>
-              <input v-model="user.userId" type="text" placeholder="ID" required disabled/>
+              <input type="text" placeholder="ID" v-model="user.userId" required disabled>
             </div>
           </div>
-
+          
           <div class="field">
             <div class="ui left icon input">
               <i class="lock icon"></i>
-              <input v-model="user.password" type="password" placeholder="Password"/>
+              <input  v-model="user.password" type="password" placeholder="password">
             </div>
           </div>
-
+          
           <div class="field">
             <div class="ui left icon input">
               <i class="tag icon"></i>
-              <input v-model="user.nickname" type="text" placeholder="Nickname"/>
+              <input  v-model="user.nickname" type="text" placeholder="Nickname">
             </div>
           </div>
-
+          
           <div class="field">
             <div class="ui left icon input">
               <i class="calendar icon"></i>
-              <input v-model.number="user.age" type="number" min="0"  placeholder="Age"/>
+              <input  v-model.number="user.age" type="text" placeholder="Age">
             </div>
           </div>
-
-          <button class="ui huge green fluid button" v-bind:disabled="isButtonDisabled" type="submit">更新</button>
+          
+          <button class="ui huge green fluid button" type="submit">
+            更新
+          </button>
+          
         </form>
       </div>
-      <button @click="deleteUser" class="ui huge grey fluid button" type="submit">退会</button>
+      
+      <button @click="deleteUser" class="ui huge grey fluid button" type="submit">
+        退会
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-// 必要なものはここでインポートする
-// @は/srcの同じ意味です
-// import something from '@/components/something.vue';
 import { baseUrl } from '@/assets/config.js';
-
-const headers = {'Authorization': 'mtiToken'};
 
 export default {
   name: 'Profile',
@@ -78,43 +60,27 @@ export default {
   data() {
     // Vue.jsで使う変数はここに記述する
     return {
-      user: {
-        userId: window.localStorage.userId,
+      user:{
+        // userId: window.localStorage.getItem('userId'),
+        // for debug
+        userId: "kento210",
         password: null,
         nickname: null,
-        age: null
+        age: null,
       },
-      errorMsg: '', // 発展課題のエラーメッセージ用
-      successMsg: '', //発展課題の成功メッセージ用
-      isCallingApi: false // 発展課題のローディング表示用
     };
   },
 
   computed: {
     // 計算した結果を変数として利用したいときはここに記述する
-    isButtonDisabled() {
-      const { userId, password, nickname, age } = this.user;
-      return !userId || !password || !nickname || !age;
-    },
   },
 
   methods: {
     // Vue.jsで使う関数はここで記述する
-    // 発展課題のエラー・成功メッセージ用
-    clearMsg(target) {
-      if (target === 'error') {
-        this.errorMsg = '';
-      } else {
-        this.successMsg = '';
-      }
-    },
-
     async submit() {
-      if (this.isCallingApi) {
-        return;
-      }
-      this.isCallingApi = true;
-
+      // headerを指定する
+      const headers = {'Authorization': 'mtiToken'};
+      // リクエストボディを指定する
       const { userId, password, nickname, age } = this.user;
       const reqBody = {
         userId,
@@ -125,7 +91,7 @@ export default {
 
       try {
         /* global fetch */
-        const res = await fetch(baseUrl + '/user', {
+        const res = await fetch(baseUrl + '/user',  {
           method: 'PUT',
           body: JSON.stringify(reqBody),
           headers
@@ -139,29 +105,55 @@ export default {
           const errorMessage = jsonData.message ?? 'エラーメッセージがありません';
           throw new Error(errorMessage);
         }
-
-        this.successMsg = 'ユーザー更新処理が完了しました'
-      } catch (e){
-        this.errorMsg = `ユーザー更新時にエラーが発生しました: ${e}`;
-      } finally {
-        this.isCallingApi = false;
+        
+        // 成功時の処理
+        console.log(jsonData);
+      } catch (e) {
+        // エラー時の処理
       }
     },
-
+    
     async deleteUser() {
-      if (this.isCallingApi) {
-        return;
-      }
-      this.isCallingApi = true;
-
+      
+      const headers = {'Authorization':'mtiToken'};
+      
       try {
         /* global fetch */
         const res = await fetch(`${baseUrl}/user?userId=${this.user.userId}`,{
-          method: 'DELETE',
-          headers
-        });
+        method: 'DELETE',
+        headers
+      });
+      
+      const text = await res.text();
+      const jsonData = text ? JSON.parse(text) : {}
 
-        const text = await res.text();
+        // fetchではネットワークエラー以外のエラーはthrowされないため、明示的にthrowする
+        if (!res.ok) {
+          const errorMessage = jsonData.message ?? 'エラーメッセージがありません';
+          throw new Error(errorMessage);
+        }
+        
+        // 成功時の処理
+        this.$router.push({ name: 'Login'});
+        console.log(jsonData);
+      } catch (e) {
+        // エラー時の処理
+      }
+    }
+  },
+  
+  created: async function() {
+    const headers = {'Authorization': 'mtitoken'};
+    
+     /* global fetch */
+    try{
+      const res = await fetch(baseUrl + `/user?userId=${this.user.userId}`,
+      {
+        method: 'GET',
+        headers
+      });
+      
+      const text = await res.text();
         const jsonData = text ? JSON.parse(text) : {}
 
         // fetchではネットワークエラー以外のエラーはthrowされないため、明示的にthrowする
@@ -169,46 +161,16 @@ export default {
           const errorMessage = jsonData.message ?? 'エラーメッセージがありません';
           throw new Error(errorMessage);
         }
-
-        // アカウント自体が消えるので、ログイン情報も破棄する
-        window.localStorage.clear();
-        this.$router.push({name: 'Login'});
-      } catch (e){
-        this.errorMsg = `ユーザー削除時にエラーが発生しました: ${e}`;
-      } finally {
-        this.isCallingApi = false;
+        
+        // 成功時の処理
+        this.user.nickname = jsonData.nickname;
+        this.user.age = jsonData.age;
+        console.log(jsonData);
+      } catch (e) {
+        // エラー時の処理
       }
-    }
-  },
-
-  created: async function() {
-    this.isCallingApi = true;
-
-    try {
-      /* global fetch */
-      const res = await fetch(baseUrl + `/user?userId=${this.user.userId}`,  {
-        method: 'GET',
-        headers
-      });
-
-      const text = await res.text();
-      const jsonData = text ? JSON.parse(text) : {}
-
-      // fetchではネットワークエラー以外のエラーはthrowされないため、明示的にthrowする
-      if (!res.ok) {
-        const errorMessage = jsonData.message ?? 'エラーメッセージがありません';
-        throw new Error(errorMessage);
-      }
-
-      this.user.nickname = jsonData.nickname;
-      this.user.age = jsonData.age;
-    } catch (e) {
-      this.errorMsg = `ユーザー情報取得時にエラーが発生しました: ${e}`;
-    } finally {
-      this.isCallingApi = false;
     }
   }
-}
 </script>
 
 <style scoped>

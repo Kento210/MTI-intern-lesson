@@ -2,63 +2,52 @@
   <div>
     <div class="ui main container">
       <!-- 基本的なコンテンツはここに記載する -->
-
-      <!-- 発展課題のローディング表示用 -->
-      <div class="ui active inverted page dimmer" v-if="isCallingApi">
-        <div class="ui text loader">Loading</div>
-      </div>
-
       <div class="ui segment">
-        <!-- 発展課題のエラーメッセージ用-->
-        <p class="ui negative message" v-if="errorMsg">
-          <i class="close icon" @click="clearError"></i>
-          <span class="header">エラーが発生しました！</span>
-          {{ errorMsg }}
-        </p>
-
-        <!-- submitイベントを拾って、preventにて規定のアクションを中止し、submitメソッドを呼び出す。-->
-        <form class="ui large form" @submit.prevent="submit" >
+        
+        <form class="ui large form" @submit.prevent="submit">
           <div class="field">
             <div class="ui left icon input">
               <i class="user icon"></i>
-              <input v-model="user.userId" type="text" placeholder="ID"/>
+              <input type="text" placeholder="ID" v-model="user.userId">
             </div>
           </div>
-
+          
           <div class="field">
             <div class="ui left icon input">
               <i class="lock icon"></i>
-              <input v-model="user.password" type="password" placeholder="Password"/>
+              <input type="password" placeholder="password" v-model="user.password">
             </div>
           </div>
-
+          
           <div class="field" v-if="!isLogin">
             <div class="ui left icon input">
               <i class="tag icon"></i>
-              <input v-model="user.nickname" type="text" placeholder="Nickname"/>
+              <input type="text" placeholder="Nickname" v-model="user.nickname">
             </div>
           </div>
-
+          
           <div class="field" v-if="!isLogin">
             <div class="ui left icon input">
               <i class="calendar icon"></i>
-              <input v-model.number="user.age" type="number" min="0" placeholder="Age"/>
+              <input type="text" placeholder="Age" v-model="user.age">
             </div>
           </div>
-
-          <button class="ui huge green fluid button" :disabled="isButtonDisabled" type="submit">{{ submitBtnText }}</button>
+          
+          <button class="ui huge green fluid button" type="submit">
+            {{ submitText }}
+          </button>
+          
         </form>
       </div>
-
-      <button @click="toggleMode" class="ui huge grey fluid button" type="submit">{{ toggledBtnText }}</button>
+      
+      <button @click="toggleMode()" class="ui huge grey fluid button" type="submit">
+        {{ toggleText }}
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-// 必要なものはここでインポートする
-// @は/srcの同じ意味です
-// import something from '@/components/something.vue';
 import { baseUrl } from '@/assets/config.js';
 
 export default {
@@ -72,68 +61,52 @@ export default {
     // Vue.jsで使う変数はここに記述する
     return {
       isLogin: true,
-      user: {
+      user:{
         userId: null,
         password: null,
         nickname: null,
-        age: null
+        age: null,
       },
-      errorMsg: '', // 発展課題のエラーメッセージ用
-      isCallingApi: false // 発展課題のローディング表示用
     };
   },
 
   computed: {
     // 計算した結果を変数として利用したいときはここに記述する
-
-    // 発展課題のボタン活性/非活性用
-    isButtonDisabled() {
-      const { userId, password, nickname, age } = this.user;
-      return this.isLogin
-          ? !userId || !password
-          : !userId || !password || !nickname || !age;
+    submitText(){
+      return this.isLogin? 'ログイン':'新規登録';
     },
-
-    submitBtnText() {
-      return this.isLogin ? 'ログイン':'新規登録'
-    },
-
-    toggledBtnText() {
-      return this.isLogin ? '新規登録':'ログイン'
+    toggleText(){
+      return this.isLogin? '新規登録':'ログイン';
     }
   },
 
-
   methods: {
     // Vue.jsで使う関数はここで記述する
-
-    // 発展課題のエラーメッセージ用
-    clearError() {
-      this.errorMsg = ''
+    toggleMode(){
+      this.isLogin = !this.isLogin
     },
-
-    toggleMode() {
-      this.isLogin = !this.isLogin;
-    },
-
-    async submit() {
-      if (this.isCallingApi) {
-        return;
+    
+    async submit(){
+      if(this.isLogin){
+        console.log("login")
+        return
       }
-      this.isCallingApi = true;
-
-      const path = this.isLogin? '/user/login' : '/user/signup';
-      const { userId, password, nickname, age } = this.user;
-      const reqBody = this.isLogin
-        ? { userId, password }
-        : { userId, password, nickname, age };
+      // 成功時の処理(新規登録)
+      const headers = {'Authorization': 'mtiToken'};
+      // リクエストボディを指定する
+      const reqBody = {
+        userId: this.user.userId,
+        password: this.user.password,
+        nickname: this.user.nickname,
+        age: this.user.age,
+      };
 
       try {
         /* global fetch */
-        const res = await fetch(baseUrl + path,
-        {
+        const res = await fetch(baseUrl + '/user/signup',  {
           method: 'POST',
-          body: JSON.stringify(reqBody)
+          body: JSON.stringify(reqBody),
+          headers
         });
 
         const text = await res.text();
@@ -144,17 +117,48 @@ export default {
           const errorMessage = jsonData.message ?? 'エラーメッセージがありません';
           throw new Error(errorMessage);
         }
-
-        window.localStorage.setItem('token', jsonData.token);
-        window.localStorage.setItem('userId', this.user.userId);
-
-        this.$router.push({ name: 'Home' });
+        
+        // 成功時の処理
+        console.log(jsonData);
       } catch (e) {
-        console.error(e);
-        this.errorMsg = e;
-      } finally {
-        this.isCallingApi = false;
+        // エラー時の処理
       }
+      
+      // ログイン時の処理
+      const requestBody_login = {
+        userId: this.user.userId,
+        password: this.user.password,
+      };
+
+      try {
+        /* global fetch */
+        const res = await fetch(baseUrl + '/user/login',  {
+          method: 'POST',
+          body: JSON.stringify(requestBody_login),
+          headers
+        });
+
+        const text = await res.text();
+        const jsonData = text ? JSON.parse(text) : {}
+
+        // fetchではネットワークエラー以外のエラーはthrowされないため、明示的にthrowする
+        if (!res.ok) {
+          const errorMessage = jsonData.message ?? 'エラーメッセージがありません';
+          throw new Error(errorMessage);
+        }
+        
+        window.localStorage.setItem("token", jsonData.token);
+        window.localStorage.setItem("userId", this.user.userId);
+        
+        this.$router.push({ name: "Home"})
+        
+        // 成功時の処理
+        console.log(jsonData);
+      } catch (e) {
+        // エラー時の処理
+      }
+      
+      
     }
   },
 }
