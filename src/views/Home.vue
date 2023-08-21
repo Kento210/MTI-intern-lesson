@@ -30,7 +30,23 @@
           </div>
         </form>
       </div>
-
+      
+      <!-- 投稿一覧 -->
+      <h1 class="ui dividing header">投稿一覧</h1>
+      <div class="ui segment">
+        <ul class="ui comments divided article-list">
+          <template v-for="(article, index) in articles" :key="index">
+            <li class="comment">
+              <div class="content">
+                <span class="author">{{ article.userId }}</span>
+                <p class="text">
+                  {{ article.text }}
+                </p>
+              </div>
+            </li>
+          </template>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -96,7 +112,26 @@
     methods: {
       // Vue.jsで使う関数はここで記述する
       // isMyArticle(id) {}, // 自分の記事かどうかを判定する
-      // async getArticles() {}, // 記事一覧を取得する
+      // 記事一覧を取得する
+      async getArticles() {
+        
+        try {
+          const res = await fetch(baseUrl + "/articles", {
+            method: "GET",
+            headers,
+          });
+          
+          const text = await res.text();
+          const jsonData = text ? JSON.parse(text) : {};
+          
+          this.articles = jsonData.articles ?? [];
+        } catch (e) {
+          this.errorMsg = `記事一覧取得時にエラーが発生しました: ${e}`;
+        } finally {
+          this.isCallingApi = false;
+        }
+      },
+          
       async postArticle() {
         // リクエストボディを指定する
         const requestBody = {
