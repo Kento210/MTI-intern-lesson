@@ -44,6 +44,13 @@
                     convertToLocaleString(article.timestamp)
                   }}</span>
                 </div>
+                <button
+                  v-if="isMyArticle(article.userId)"
+                  class="ui negative mini button right floated"
+                  @click="deleteArticle(article)"
+                >
+                  削除
+                </button>
                 <p class="text">
                   {{ article.text }}
                 </p>
@@ -120,7 +127,10 @@
 
     methods: {
       // Vue.jsで使う関数はここで記述する
-      // isMyArticle(id) {}, // 自分の記事かどうかを判定する
+      // 自分の記事かどうかを判定する
+      isMyArticle(id) {
+        return this.iam === id;
+      },
       // 記事一覧を取得する
       async getArticles() {
         
@@ -178,7 +188,45 @@
       },// 記事を作成する
 
         // async getSearchedArticles() {}, // 記事を検索する
-        // async deleteArticle(article) {}, // 記事を削除する
+      async deleteArticle(article) {
+        if (this.isCallingApi) {
+          return;
+        }
+        this.isCallingApi = true;
+  
+        const { userId, timestamp } = article;
+        try {
+          /* global fetch */
+          const res = await fetch(
+            `${baseUrl}/article?userId=${userId}&timestamp=${timestamp}`,
+            {
+              method: "DELETE",
+              headers,
+            }
+          );
+  
+          const text = await res.text();
+          const jsonData = text ? JSON.parse(text) : {};
+  
+          // fetchではネットワークエラー以外のエラーはthrowされないため、明示的にthrowする
+          if (!res.ok) {
+            const errorMessage =
+              jsonData.message ?? "エラーメッセージがありません";
+            throw new Error(errorMessage);
+          }
+  
+          const deleted = this.articles.findIndex(
+            (a) => a.userId === userId && a.timestamp === timestamp
+          );
+          this.articles.splice(deleted, 1);
+          this.successMsg = "記事が削除されました！";
+        } catch (e) {
+          console.error(e);
+          this.errorMsg = e;
+        } finally {
+          this.isCallingApi = false;
+        }
+      },// 記事を削除する
         // convertToLocaleString(timestamp) {} // timestampをLocaleDateStringに変換する
       convertToLocaleString(timestamp) {
         return new Date(timestamp).toLocaleString();
