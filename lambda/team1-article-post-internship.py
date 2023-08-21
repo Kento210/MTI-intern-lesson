@@ -1,5 +1,9 @@
 import json
 import time
+import boto3
+
+# DynamoDBのクライアントを初期化
+dynamodb = boto3.client('dynamodb')
 
 def post_article(event, context):
     # リクエストボディを取得
@@ -15,10 +19,25 @@ def post_article(event, context):
     # パラメータを変数に格納
     user_id = body['userId']
     text = body['text']
-    category = body.get('category', None)  # categoryはオプションなので、存在しない場合はNoneをデフォルトとする
+    category = body.get('category', None)  # categoryはオプショナル
 
     # 現在のUNIXタイムスタンプをミリ秒単位で取得
     timestamp = int(time.time() * 1000)
+
+    # DynamoDBにデータを登録
+    item = {
+        'userId': {'S': user_id},
+        'timestamp': {'N': str(timestamp)},
+        'text': {'S': text},
+    }
+    
+    if category:
+        item['category'] = {'S': category}
+
+    dynamodb.put_item(
+        TableName='Article',
+        Item=item
+    )
 
     # レスポンスを作成
     response = {
