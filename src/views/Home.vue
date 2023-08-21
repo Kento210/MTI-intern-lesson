@@ -47,6 +47,9 @@
                 <p class="text">
                   {{ article.text }}
                 </p>
+                <span v-if="article.category" class="ui blue label">{{
+                  article.category
+                }}</span>
               </div>
             </li>
           </template>
