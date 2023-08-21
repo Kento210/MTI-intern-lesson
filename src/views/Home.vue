@@ -2,6 +2,7 @@
   <div>
     <div class="ui main container">
       <!-- 基本的なコンテンツはここに記載する -->
+      
       <div class="ui segment">
       </div>
     </div>
@@ -15,6 +16,7 @@
   // import { baseUrl } from '@/assets/config.js';
 
   // const headers = {'Authorization' : 'mtiToken'};
+  import { baseUrl } from '@/assets/config.js';
 
   export default {
     name: 'Home',
@@ -62,7 +64,8 @@
       // Vue.jsで使う関数はここで記述する
       // isMyArticle(id) {}, // 自分の記事かどうかを判定する
       // async getArticles() {}, // 記事一覧を取得する
-      // async postArticle() {}, // 記事を作成する
+      async postArticle() {}, // 記事を作成する
+      
       // async getSearchedArticles() {}, // 記事を検索する
       // async deleteArticle(article) {}, // 記事を削除する
       // convertToLocaleString(timestamp) {} // timestampをLocaleDateStringに変換する
