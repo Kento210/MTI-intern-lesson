@@ -15,28 +15,28 @@
         <!-- ここにセグメントの中身を記述する -->
         <form class="ui large form" @submit.prevent="submit">
           <div class="field">
-            <div class="ui left icom input">
+            <div class="ui left icon input">
               <i class="user icon"></i>
               <input type="text" placeholder="ID" v-model="user.userId" />
             </div>
           </div>
 
           <div class="field">
-            <div class="ui left icom input">
+            <div class="ui left icon input">
               <i class="lock icon"></i>
               <input type="password" placeholder="Password" v-model="user.password" />
             </div>
           </div>
 
           <div class="field" v-if="!isLogin">
-            <div class="ui left icom input">
+            <div class="ui left icon input">
               <i class="tag icon"></i>
               <input type="text" placeholder="Nickname" v-model="user.nickname" />
             </div>
           </div>
 
           <div class="field" v-if="!isLogin">
-            <div class="ui left icom input">
+            <div class="ui left icon input">
               <i class="calendar icon"></i>
               <input type="text" placeholder="Age" v-model.number="user.age" />
             </div>
