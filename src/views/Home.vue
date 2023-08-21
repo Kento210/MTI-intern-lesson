@@ -39,6 +39,11 @@
             <li class="comment">
               <div class="content">
                 <span class="author">{{ article.userId }}</span>
+                <div class="metadata">
+                  <span class="date">{{
+                    convertToLocaleString(article.timestamp)
+                  }}</span>
+                </div>
                 <p class="text">
                   {{ article.text }}
                 </p>
@@ -165,14 +170,17 @@
         catch (e) {
           // エラー時の処理
           console.log("error");
-        } // 記事を作成する
+        }
+      },// 記事を作成する
 
         // async getSearchedArticles() {}, // 記事を検索する
         // async deleteArticle(article) {}, // 記事を削除する
         // convertToLocaleString(timestamp) {} // timestampをLocaleDateStringに変換する
-      }
+      convertToLocaleString(timestamp) {
+        return new Date(timestamp).toLocaleString();
+      },
     },
-  }
+  };
 </script>
 
 <style scoped>
