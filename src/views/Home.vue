@@ -50,6 +50,7 @@
                 <span v-if="article.category" class="ui blue label">{{
                   article.category
                 }}</span>
+                <div class="ui divider"></div>
               </div>
             </li>
           </template>
